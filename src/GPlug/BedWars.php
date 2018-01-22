@@ -1,6 +1,6 @@
 <?php
 
-namespace Bluplayz;
+namespace Brentie2006;
 
 
 use pocketmine\block\Block;

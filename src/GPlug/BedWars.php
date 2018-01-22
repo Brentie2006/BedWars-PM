@@ -66,7 +66,7 @@ class Bedwars extends PluginBase implements Listener {
         @mkdir($this->getDataFolder()."Arenas");
         @mkdir($this->getDataFolder()."Maps");
         $files = scandir($this->getDataFolder()."Arenas");
-        foreach($files as $filename){(EXCEPTION)and
+        foreach($files as $filename){(EXCEPTION) in"src/pocketmine/plugin/PharPluginLoader"
             if($filename != "." && $filename != ".."){
                 $filename = str_replace(".yml", "", $filename);
                 $this->resetArena($filename);

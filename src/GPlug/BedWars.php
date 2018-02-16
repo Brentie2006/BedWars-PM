@@ -1,6 +1,6 @@
 <?php
 
-namespace Brentie2006;
+namespace GPlug;
 
 
 use pocketmine\block\Block;
@@ -39,12 +39,15 @@ use pocketmine\nbt\tag\StringTag;
 use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\PluginTask;
+use pocketmine\Server;
 use pocketmine\tile\Chest;
 use pocketmine\tile\Sign;
 use pocketmine\tile\Tile;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
-class Bedwars extends PluginBase implements Listener {
+
+class BedWars extends PluginBase implements Listener {
+
     public $prefix = TextFormat::GRAY."[".TextFormat::DARK_AQUA."BedWars-MP".TextFormat::GRAY."]".TextFormat::WHITE." ";
     public $registerSign = false;
     public $registerSignWHO = "";
@@ -60,26 +63,26 @@ class Bedwars extends PluginBase implements Listener {
     public $isShopping = array();
     public $breakableblocks = array();
     public function onEnable(){
-        $this->getServer()->getPluginManager()->registerEvents($this, $this);
+        Server::getInstance()->getPluginManager()->registerEvents($this, $this);
         $this->getLogger()->info($this->prefix.TextFormat::GREEN."Plugin Activated");
         @mkdir($this->getDataFolder());
         @mkdir($this->getDataFolder()."Arenas");
         @mkdir($this->getDataFolder()."Maps");
         $files = scandir($this->getDataFolder()."Arenas");
-        foreach($files as $filename){(src/GPlug/Bedwars.php)
+        foreach($files as $filename){
             if($filename != "." && $filename != ".."){
                 $filename = str_replace(".yml", "", $filename);
                 $this->resetArena($filename);
                 $levels = $this->getArenaWorlds($filename);
                 foreach($levels as $levelname){
-                    $level = $this->getServer()->getLevelByName($levelname);
+                    $level = Server::getInstance()->getLevelByName($levelname);
                     if($level instanceof Level){
-                        $this->getServer()->unloadLevel($level);
+                        Server::getInstance()->unloadLevel($level);
                     }
-                    $this->copymap($this->getDataFolder() . "Maps/" . $levelname, $this->getServer()->getDataPath() . "worlds/" . $levelname);
-                    $this->getServer()->loadLevel($levelname);
+                    $this->copymap($this->getDataFolder() . "Maps/" . $levelname, Server::getInstance()->getDataPath() . "worlds/" . $levelname);
+                    Server::getInstance()->loadLevel($levelname);
                 }
-                $this->getServer()->loadLevel($this->getWarteLobby($filename));
+                Server::getInstance()->loadLevel($this->getWarteLobby($filename));
             }
         }
         $cfg = new Config($this->getDataFolder()."config.yml", Config::YAML);
@@ -1266,7 +1269,7 @@ class Bedwars extends PluginBase implements Listener {
     ############################################################################################################
     ############################################################################################################
     ############################################################################################################
-    public function onCommand(CommandSender $sender, Command $cmd, $label, array $args){
+    public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args): bool{
         $name = $sender->getName();
         if($cmd->getName() == "Start" && $sender->hasPermission("bw.forcestart")){
             if($sender instanceof Player){
@@ -1280,7 +1283,7 @@ class Bedwars extends PluginBase implements Listener {
                 }
             }
         }
-        if($cmd->getName() == "Bedwars" && $sender->isOP()){
+        if($cmd->getName() == "bedwars" && $sender->isOP()){
             if(!empty($args[0])){
                 if(strtolower($args[0]) == "help" && $sender->isOP()){
                     $sender->sendMessage(TextFormat::GRAY."======================");
@@ -1429,6 +1432,7 @@ class Bedwars extends PluginBase implements Listener {
                 $this->getServer()->dispatchCommand($sender, "bw help");
             }
         }
+        return false;
     }
 }
 ############################################################################################################
@@ -1446,7 +1450,7 @@ class BWRefreshSigns extends PluginTask {
         $this->prefix = $this->plugin->prefix;
         parent::__construct($plugin);
     }
-    public function onRun($tick) {
+    public function onRun(int $tick) {
         $level = $this->plugin->getServer()->getDefaultLevel();
         $tiles = $level->getTiles();
         foreach ($tiles as $t) {
@@ -1485,7 +1489,7 @@ class BWGameSender extends PluginTask {
         $this->prefix = $plugin->prefix;
         parent::__construct($plugin);
     }
-    public function onRun($tick) {
+    public function onRun(int $tick) {
         $files = scandir($this->plugin->getDataFolder()."Arenas");
         foreach($files as $filename){
             if($filename != "." && $filename != ".."){
